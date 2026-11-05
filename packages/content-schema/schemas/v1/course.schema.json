@@ -1,0 +1,114 @@
+{
+  "$id": "urn:learnlab:content:v1:course.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "number",
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "language": {
+      "type": "string",
+      "enum": [
+        "it",
+        "en"
+      ]
+    },
+    "level": {
+      "type": "string",
+      "enum": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ]
+    },
+    "tags": {
+      "default": [],
+      "maxItems": 20,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 40
+      }
+    },
+    "authors": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "profiles": {
+      "type": "object",
+      "properties": {
+        "kotlin": {
+          "type": "string",
+          "enum": [
+            "base",
+            "web"
+          ]
+        },
+        "rust": {
+          "type": "string",
+          "enum": [
+            "base",
+            "web"
+          ]
+        },
+        "java": {
+          "type": "string",
+          "enum": [
+            "base",
+            "web"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "exercisesFrom": {
+      "type": "string",
+      "pattern": "^\\.\\.\\/[a-z0-9][a-z0-9-]*$"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "id",
+    "title",
+    "description",
+    "language",
+    "authors"
+  ],
+  "additionalProperties": false,
+  "title": "Learn2K course (course.yaml)"
+}

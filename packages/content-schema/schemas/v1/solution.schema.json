@@ -1,0 +1,1061 @@
+{
+  "$id": "urn:learnlab:content:v1:solution.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "number",
+      "const": 1
+    },
+    "exerciseId": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "language": {
+      "type": "string",
+      "minLength": 1
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "added",
+              "changed"
+            ]
+          },
+          "tree": {
+            "$ref": "#/$defs/RootNode"
+          }
+        },
+        "required": [
+          "path",
+          "status",
+          "tree"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "omitted": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "exerciseId",
+    "language",
+    "files",
+    "omitted"
+  ],
+  "additionalProperties": false,
+  "title": "Learn2K exercise solution view",
+  "$defs": {
+    "RootNode": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "root"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentNode"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "children"
+      ],
+      "additionalProperties": false
+    },
+    "ContentNode": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "text"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/ElementNode"
+        },
+        {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/CodeNode"
+            },
+            {
+              "$ref": "#/$defs/CodeTabsNode"
+            },
+            {
+              "$ref": "#/$defs/CalloutNode"
+            },
+            {
+              "$ref": "#/$defs/ImageNode"
+            },
+            {
+              "$ref": "#/$defs/VideoNode"
+            },
+            {
+              "$ref": "#/$defs/QuizNode"
+            },
+            {
+              "$ref": "#/$defs/QuestionNode"
+            },
+            {
+              "$ref": "#/$defs/OptionNode"
+            },
+            {
+              "$ref": "#/$defs/BlankNode"
+            },
+            {
+              "$ref": "#/$defs/DrawNode"
+            },
+            {
+              "$ref": "#/$defs/ExerciseNode"
+            },
+            {
+              "$ref": "#/$defs/SimulatorNode"
+            },
+            {
+              "$ref": "#/$defs/CheckpointNode"
+            },
+            {
+              "$ref": "#/$defs/ObjectiveNode"
+            },
+            {
+              "$ref": "#/$defs/DiagramNode"
+            },
+            {
+              "$ref": "#/$defs/PlaygroundNode"
+            }
+          ]
+        }
+      ]
+    },
+    "ElementNode": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "element"
+        },
+        "tagName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "properties": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": [
+                    "string",
+                    "number"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentNode"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "tagName",
+        "properties",
+        "children"
+      ],
+      "additionalProperties": false
+    },
+    "CodeNode": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "component"
+        },
+        "name": {
+          "type": "string",
+          "const": "Code"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "lang": {
+              "type": "string",
+              "minLength": 1
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "code": {
+              "type": "string"
+            },
+            "lineNumbers": {
+              "type": "boolean"
+            },
+            "select": {
+              "type": "string",
+              "enum": [
+                "one",
+                "many"
+              ]
+            }
+          },
+          "required": [
+            "lang",
+            "code",
+            "lineNumbers"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentNode"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false
+    },
+    "CodeTabsNode": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "component"
+        },
+        "name": {
+          "type": "string",
+          "const": "CodeTabs"
+        },
+        "props": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentNode"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false
+    },
+    "CalloutNode": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "component"
+        },
+        "name": {
+          "type": "string",
+          "const": "Callout"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "note",
+                "tip",
+                "warning",
+                "danger",
+                "try"
+              ]
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentNode"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false
+    },
+    "ImageNode": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "component"
+        },
+        "name": {
+          "type": "string",
+          "const": "Image"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "src": {
+              "type": "string",
+              "minLength": 1
+            },
+            "alt": {
+              "type": "string"
+            },
+            "caption": {
+              "type": "string",
+              "minLength": 1
+            },
+            "width": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "height": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "src",
+            "alt"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentNode"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false
+    },
+    "VideoNode": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "component"
+        },
+        "name": {
+          "type": "string",
+          "const": "Video"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "provider": {
+              "type": "string",
+              "enum": [
+                "youtube",
+                "vimeo"
+              ]
+            },
+            "videoId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "start": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "provider",
+            "videoId"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentNode"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false
+    },
+    "QuizNode": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "component"
+        },
+        "name": {
+          "type": "string",
+          "const": "Quiz"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "attempts": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentNode"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false
+    },
+    "QuestionNode": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "component"
+        },
+        "name": {
+          "type": "string",
+          "const": "Question"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "single",
+                "multiple",
+                "true-false",
+                "fill",
+                "order",
+                "find-error"
+              ]
+            },
+            "shuffle": {
+              "type": "boolean",
+              "const": false
+            }
+          },
+          "required": [
+            "id",
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentNode"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false
+    },
+    "OptionNode": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "component"
+        },
+        "name": {
+          "type": "string",
+          "const": "Option"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentNode"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false
+    },
+    "BlankNode": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "component"
+        },
+        "name": {
+          "type": "string",
+          "const": "Blank"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "width": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 80
+            },
+            "label": {
+              "type": "string",
+              "minLength": 1
+            },
+            "numeric": {
+              "type": "boolean",
+              "const": true
+            }
+          },
+          "required": [
+            "id",
+            "width"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentNode"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false
+    },
+    "DrawNode": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "component"
+        },
+        "name": {
+          "type": "string",
+          "const": "Draw"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "bank": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "count": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "bank",
+            "count"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentNode"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false
+    },
+    "ExerciseNode": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "component"
+        },
+        "name": {
+          "type": "string",
+          "const": "Exercise"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "summary": {
+              "type": "string",
+              "minLength": 1
+            },
+            "languages": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "duration": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "kind": {
+              "type": "string",
+              "const": "tests"
+            },
+            "mutants": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "solutionUnlock": {
+              "type": "object",
+              "properties": {
+                "unlock": {
+                  "type": "string",
+                  "enum": [
+                    "always",
+                    "after-pass",
+                    "after-attempts"
+                  ]
+                },
+                "attempts": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "unlock"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "summary",
+            "languages"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentNode"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false
+    },
+    "SimulatorNode": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "component"
+        },
+        "name": {
+          "type": "string",
+          "const": "Simulator"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "src": {
+              "type": "string",
+              "pattern": "^simulators\\/[a-z0-9]+(?:-[a-z0-9]+)*\\/index\\.html$"
+            },
+            "height": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "wide": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "src"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentNode"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false
+    },
+    "CheckpointNode": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "component"
+        },
+        "name": {
+          "type": "string",
+          "const": "Checkpoint"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentNode"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false
+    },
+    "ObjectiveNode": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "component"
+        },
+        "name": {
+          "type": "string",
+          "const": "Objective"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "review": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentNode"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false
+    },
+    "DiagramNode": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "component"
+        },
+        "name": {
+          "type": "string",
+          "const": "Diagram"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "alt": {
+              "type": "string",
+              "minLength": 1
+            },
+            "caption": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "source",
+            "alt"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentNode"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false
+    },
+    "PlaygroundNode": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "component"
+        },
+        "name": {
+          "type": "string",
+          "const": "Playground"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "language": {
+              "type": "string",
+              "minLength": 1
+            },
+            "code": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "runnable": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "language",
+            "code",
+            "runnable"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentNode"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

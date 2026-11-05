@@ -1,3 +1,5 @@
+<!-- The page of the public repository gmalnati/learn-author: links are relative to its root (tools/learn-author/public-files.txt). -->
+
 # learn-author
 
 `learn-author` è lo strumento di chi scrive i corsi di [Learn2K](https://learn2k.it): crea corsi, lezioni ed esercizi da un modello, controlla i sorgenti, mostra il corso nel browser come lo vedranno gli studenti e lo pubblica.
@@ -45,6 +47,15 @@ Il primo comando scarica, una volta sola, Node.js 24 da nodejs.org e il programm
 
 `learn-author --help` e `learn-author <comando> --help` elencano tutte le opzioni. Il corso è la cartella corrente, se non ne indichi un'altra. I messaggi sono in italiano, oppure in inglese con `--lang en`.
 
+## Come si scrive un corso
+
+- La [guida al formato dei corsi](docs/guides/formato-dei-corsi.md): cartelle, lezioni in MDX, componenti didattici, pubblicazione, errori e avvisi.
+- La [guida agli esercizi](docs/guides/esercizi.md): gli esercizi che gli studenti verificano sul proprio computer con `learn check`, in Docker.
+- Il [corso demo](courses/demo), che usa ogni componente ed è il riferimento da copiare. Per provarlo scarica questo repository (*Code → Download ZIP*, oppure `git clone https://github.com/gmalnati/learn-author`) e, dalla sua cartella, esegui `learn-author preview courses/demo`.
+- I [progetti delle immagini degli esercizi](images), da cui partono starter e soluzioni, e gli [schemi JSON](packages/content-schema/schemas/v1) per il completamento nell'editor.
+
+Guide e corso demo corrispondono all'ultima versione di `learn-author`: si aggiornano a ogni release.
+
 ## Proxy, copie dei file e altre impostazioni
 
 | Variabile | Effetto |
@@ -63,7 +74,8 @@ Le versioni precedenti di Node.js e del programma si cancellano quando una nuova
 
 - puoi usarlo per scopi non commerciali, per esempio per studio, nella scuola o in un ente senza scopo di lucro;
 - puoi usarlo anche per lavoro, ma solo per preparare corsi e pubblicarli su un'istanza di Learn2K gestita da TonicMinds s.r.l. o da chi ha il suo permesso;
-- non puoi modificarlo né ridistribuirlo: chi lo vuole lo scarica da qui.
+- non puoi modificarlo né ridistribuirlo: chi lo vuole lo scarica da qui;
+- puoi copiare e adattare parti del corso demo e dei progetti delle immagini degli esercizi nei corsi che prepari per Learn2K.
 
 I corsi che scrivi restano tuoi. I componenti di terzi inclusi mantengono le loro licenze, elencate in `THIRD-PARTY-NOTICES.txt` di ogni release.
 
@@ -71,6 +83,6 @@ I corsi che scrivi restano tuoi. I componenti di terzi inclusi mantengono le lor
 
 `learn-author` is the tool of the authors of [Learn2K](https://learn2k.it) courses: it creates courses from templates, checks their sources, previews them in the browser and publishes them.
 
-Download the file for your system from the [latest release](https://github.com/gmalnati/learn-author/releases/latest), rename it to `learn-author` (`learn-author.exe` on Windows) and put it on your `PATH`. Its first run downloads Node.js 24 from nodejs.org and the program of its version (45–65 MB), and checks their SHA-256; after that it works offline, except `publish`. Run `learn-author --help --lang en` for the commands, and `learn-author update` for new versions. The variables above set a proxy, copies of the downloads, an installed Node.js 24 (needed on musl distributions such as Alpine) and the folder of the downloads.
+Download the file for your system from the [latest release](https://github.com/gmalnati/learn-author/releases/latest), rename it to `learn-author` (`learn-author.exe` on Windows) and put it on your `PATH`. Its first run downloads Node.js 24 from nodejs.org and the program of its version (45–65 MB), and checks their SHA-256; after that it works offline, except `publish`. Run `learn-author --help --lang en` for the commands, and `learn-author update` for new versions. The guides to the format of the courses and to the exercises are in [docs/guides](docs/guides), in Italian; the example course, which uses every component, is in [courses/demo](courses/demo). The variables above set a proxy, copies of the downloads, an installed Node.js 24 (needed on musl distributions such as Alpine) and the folder of the downloads.
 
-`learn-author` is free under the PolyForm Strict License 1.0.0 with an additional permission of TonicMinds s.r.l. ([LICENSE](LICENSE)): noncommercial use, and commercial use only to prepare courses and publish them on a Learn2K instance run or authorized by TonicMinds s.r.l.; no changes and no redistribution. Your courses remain yours.
+`learn-author` is free under the PolyForm Strict License 1.0.0 with an additional permission of TonicMinds s.r.l. ([LICENSE](LICENSE)): noncommercial use, and commercial use only to prepare courses and publish them on a Learn2K instance run or authorized by TonicMinds s.r.l.; no changes and no redistribution. You may copy and adapt parts of the example course and of the projects of the exercise images in your courses for Learn2K. Your courses remain yours.

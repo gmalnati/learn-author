@@ -1,0 +1,3 @@
+# L'immagine del servizio ha bisogno solo del jar.
+.github/
+k8s/

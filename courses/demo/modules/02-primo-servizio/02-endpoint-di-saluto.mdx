@@ -1,0 +1,125 @@
+---
+id: endpoint-di-saluto
+title: Un endpoint di saluto
+duration: 45
+objectives:
+  - Implementare un endpoint GET con un parametro facoltativo
+  - Verificare il servizio in locale con i test HTTP
+prerequisites: [protocollo-http, ambiente-locale]
+tags: [http, esercizi]
+level: beginner
+---
+
+È il momento di scrivere il tuo primo servizio. Se ti serve un ripasso, rileggi
+[la lezione su HTTP](../01-introduzione/02-protocollo-http.mdx).
+
+<Video
+  id="video-esempio-vimeo"
+  url="https://vimeo.com/1084537"
+  title="Big Buck Bunny (Blender Foundation, CC BY 3.0): esempio di video Vimeo"
+/>
+
+<Exercise id="hello-http" objectives={["endpoint-get", "test-http"]} />
+
+<Callout type="tip">
+  Prima di iniziare, controlla che l'ambiente sia pronto con `learn doctor`: se è la prima volta,
+  segui la lezione [Prepara l'ambiente](./01-ambiente-locale.mdx).
+</Callout>
+
+Ora fai il contrario: il servizio di saluto è già scritto, con qualche regola in più, e tocca a te
+scriverne i test. `learn check` li prova anche su alcune versioni del servizio con un bug: un buon
+test se ne accorge.
+
+<Exercise id="test-del-saluto" objectives={["test-http"]} />
+
+I test non servono solo ai servizi. Nel prossimo esercizio c'è una sola funzione, senza un servizio
+da avviare, e i tuoi test devono scoprire i bug nascosti ai confini dei suoi intervalli.
+
+<Exercise id="i-test-di-una-funzione" />
+
+Poi un esercizio diverso: non scrivi né un servizio né dei test, ma un programma che legge la prima
+riga di una richiesta HTTP dallo standard input e ne stampa le parti. Lo verificano dei casi di input
+e output, gli stessi in Kotlin e in Rust.
+
+<Exercise id="la-riga-di-richiesta" />
+
+I codici di stato delle risposte si possono anche spiegare in una pagina web: nel prossimo esercizio
+la scrivi in React. Dopo i test interni, `learn check` apre la pagina in un browser e la usa come
+farebbe una persona.
+
+<Exercise id="i-codici-di-stato" />
+
+Un servizio può anche calcolare qualcosa di difficile. Nel prossimo esercizio, in Java, un risolutore
+di vincoli prepara un piccolo orario scolastico: scrivi le regole che non deve violare, e un
+validatore indipendente controlla che le rispetti.
+
+<Exercise id="un-orario-senza-conflitti" />
+
+Un servizio, infine, va anche portato in produzione: con un'immagine Docker, un workflow che la
+costruisce e i manifest che la avviano in un cluster Kubernetes. Nell'ultimo esercizio non scrivi
+codice, ma correggi questi file. `learn check` non costruisce né avvia niente: li legge con gli
+strumenti che si usano in un gruppo di lavoro e con le sue regole.
+
+<Exercise id="pronto-per-il-cluster" />
+
+Prima del riepilogo, una verifica con tre tipi di domanda diversi: completa il codice, metti in
+ordine i passi e trova la riga sbagliata.
+
+<Quiz id="quiz-endpoint" title="Verifica l'endpoint di saluto" attempts={3}>
+  <Question id="parametro-facoltativo" type="fill" objectives={["endpoint-get"]} explanation="Con `required = false` il parametro può mancare: allora vale `null`, e l'operatore Elvis sceglie `mondo`.">
+    Completa l'endpoint: il nome è facoltativo e, se manca, il saluto è per il `mondo`.
+
+    ```kotlin title="SalutoController.kt"
+    @GetMapping("/saluto")
+    fun saluto(
+        @RequestParam(required = <Blank answer="false" />) nome: String?,
+    ) = Saluto("Ciao, ${nome <Blank answer="?:" label="operatore" explanation="`?:` restituisce il valore a destra quando quello a sinistra è `null`." /> "mondo"}!")
+    ```
+
+    Una richiesta riuscita riceve il codice di stato <Blank answer={200} label="codice di stato" />.
+  </Question>
+
+  <Question id="ciclo-di-un-esercizio" type="order" objectives={["test-http"]} explanation="Si scarica l'esercizio, si scrive il codice e lo si verifica in locale: alla piattaforma arriva solo l'esito di `learn check`.">
+    Metti in ordine i passi per svolgere un esercizio con la CLI `learn`.
+
+    <Option>Scarica l'esercizio con `learn get`</Option>
+    <Option>Scrivi il codice nello starter</Option>
+    <Option>Verifica il servizio in locale con `learn check`</Option>
+    <Option>Ritrova l'esito nella pagina del corso</Option>
+  </Question>
+
+  <Question id="metodo-sbagliato" type="find-error" explanation="`@PostMapping` risponde solo alle richieste `POST`: una `GET /saluto` riceverebbe `405 Method Not Allowed`.">
+    Questo endpoint dovrebbe rispondere a `GET /saluto`. Quale riga contiene l'errore?
+
+    ```kotlin showLineNumbers error={3}
+    @RestController
+    class SalutoController {
+        @PostMapping("/saluto")
+        fun saluto(
+            @RequestParam(required = false) nome: String?,
+        ) = Saluto("Ciao, ${nome ?: "mondo"}!")
+    }
+    ```
+  </Question>
+</Quiz>
+
+Per ripassare i codici di stato, un quiz che non scrive le sue domande: a ogni tentativo ne estrae
+due da una banca, diverse da quelle che hai già visto finché la banca ne ha.
+
+<Quiz id="quiz-codici-di-stato" title="Ripassa i codici di stato" attempts={3}>
+  <Draw bank="codici-di-stato" count={2} />
+</Quiz>
+
+Prima di passare oltre, fermati un momento: per ogni obiettivo della lezione indica quanto ti senti
+sicuro. Quelli che segni come da rivedere ti portano alla parte da rileggere. Nella pagina del corso
+trovi poi il riepilogo per obiettivo, che mette accanto alle tue risposte l'esito dei quiz e
+degli esercizi collegati.
+
+<Checkpoint id="endpoint-di-saluto-checkpoint">
+  <Objective id="endpoint-get" review="../01-introduzione/02-protocollo-http.mdx">
+    Implementare un endpoint `GET` con un parametro facoltativo
+  </Objective>
+  <Objective id="test-http" review="./01-ambiente-locale.mdx">
+    Verificare il servizio in locale con i test HTTP
+  </Objective>
+</Checkpoint>

@@ -1,0 +1,122 @@
+{
+  "$id": "urn:learnlab:content:v1:exercise-frontmatter.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "kind": {
+      "default": "service",
+      "type": "string",
+      "enum": [
+        "service",
+        "tests"
+      ]
+    },
+    "checks": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "tests",
+          "http",
+          "mutants",
+          "cases",
+          "static",
+          "browser"
+        ]
+      }
+    },
+    "duration": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1200
+    },
+    "solution": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "never",
+            "always",
+            "after-pass"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "after-attempts": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          "required": [
+            "after-attempts"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "profiles": {
+      "type": "object",
+      "properties": {
+        "kotlin": {
+          "type": "string",
+          "enum": [
+            "base",
+            "web"
+          ]
+        },
+        "rust": {
+          "type": "string",
+          "enum": [
+            "base",
+            "web"
+          ]
+        },
+        "java": {
+          "type": "string",
+          "enum": [
+            "base",
+            "web"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "environment": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Z][A-Z0-9_]*$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "maxLength": 500
+      }
+    },
+    "starter": {
+      "type": "string",
+      "enum": [
+        "builds",
+        "does-not-build"
+      ]
+    }
+  },
+  "required": [
+    "title",
+    "summary"
+  ],
+  "additionalProperties": false,
+  "title": "Learn2K exercise (README.md frontmatter)"
+}

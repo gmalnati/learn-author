@@ -1,0 +1,11 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  image:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Costruisce l'immagine
+        run: docker build -t saluto:$GITHUB_SHA .
+      - name: Ringrazia per la pull request
+        run: echo "Grazie per ${{ github.event.pull_request.title }}"

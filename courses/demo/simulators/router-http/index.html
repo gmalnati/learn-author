@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Simulator SDK (ADR 018): completed when the student has seen the three outcomes. -->
+    <meta name="learn2k-simulator" content="sdk=1; completion=reported" />
+    <title>Router HTTP</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #ffffff;
+        --fg: #1f2933;
+        --muted: #52606d;
+        --border: #d9e2ec;
+        --surface: #f5f7fa;
+        --accent: #1d4ed8;
+        --ok: #047857;
+        --ko: #b91c1c;
+      }
+      /* The portal sends its theme as data-theme; opened on its own, the page follows the system. */
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) {
+          --bg: #111827;
+          --fg: #f3f4f6;
+          --muted: #9ca3af;
+          --border: #374151;
+          --surface: #1f2937;
+          --accent: #93c5fd;
+          --ok: #6ee7b7;
+          --ko: #fca5a5;
+        }
+      }
+      :root[data-theme='dark'] {
+        color-scheme: dark;
+        --bg: #111827;
+        --fg: #f3f4f6;
+        --muted: #9ca3af;
+        --border: #374151;
+        --surface: #1f2937;
+        --accent: #93c5fd;
+        --ok: #6ee7b7;
+        --ko: #fca5a5;
+      }
+      :root[data-theme='light'] {
+        color-scheme: light;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 16px;
+        background: var(--bg);
+        color: var(--fg);
+        font:
+          15px/1.5 system-ui,
+          sans-serif;
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 1.15rem;
+      }
+      p {
+        margin: 0 0 12px;
+        color: var(--muted);
+      }
+      .request {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: end;
+        margin-bottom: 16px;
+      }
+      label {
+        display: grid;
+        gap: 2px;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      select,
+      input,
+      button {
+        font: inherit;
+        padding: 6px 10px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--surface);
+        color: var(--fg);
+      }
+      input {
+        min-width: 14rem;
+        font-family: ui-monospace, monospace;
+      }
+      button {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--bg);
+        font-weight: 600;
+        cursor: pointer;
+      }
+      :focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 16px;
+      }
+      th,
+      td {
+        padding: 6px 8px;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+      }
+      td code,
+      .response code {
+        font-family: ui-monospace, monospace;
+      }
+      tr.match td {
+        background: var(--surface);
+        font-weight: 600;
+      }
+      .why {
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+      .response {
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+      .status {
+        font-weight: 700;
+      }
+      .status.ok {
+        color: var(--ok);
+      }
+      .status.ko {
+        color: var(--ko);
+      }
+      .goal {
+        margin-top: 16px;
+        padding: 10px 12px;
+        border-left: 3px solid var(--accent);
+        background: var(--surface);
+      }
+      .goal.done {
+        border-left-color: var(--ok);
+      }
+      .goal h2 {
+        margin: 0 0 4px;
+        font-size: 1rem;
+      }
+      .goal ul {
+        margin: 0 0 8px;
+        padding: 0;
+        list-style: none;
+      }
+      .goal li {
+        display: flex;
+        gap: 8px;
+      }
+      .goal li .mark {
+        width: 1.2em;
+        color: var(--muted);
+      }
+      .goal li.reached .mark {
+        color: var(--ok);
+      }
+      .goal p {
+        margin: 0;
+        color: var(--fg);
+      }
+      .goal p.hint {
+        margin-bottom: 4px;
+        color: var(--muted);
+      }
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Router HTTP</h1>
+    <p>Scegli metodo e percorso: il router confronta la richiesta con le rotte, in ordine.</p>
+
+    <!-- Not a <form>: sandboxed pages cannot submit forms, so the button has a click handler. -->
+    <div class="request">
+      <label>
+        Metodo
+        <select id="method">
+          <option>GET</option>
+          <option>POST</option>
+          <option>DELETE</option>
+        </select>
+      </label>
+      <label>
+        Percorso
+        <input id="path" value="/saluto/Ada" autocomplete="off" spellcheck="false" />
+      </label>
+      <button type="button" id="send">Invia la richiesta</button>
+    </div>
+
+    <table>
+      <caption class="why" style="caption-side: top; text-align: left">
+        Rotte del servizio
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Metodo</th>
+          <th scope="col">Percorso</th>
+          <th scope="col">Esito del confronto</th>
+        </tr>
+      </thead>
+      <tbody id="routes"></tbody>
+    </table>
+
+    <div class="response" role="status" aria-live="polite" id="response">
+      Invia una richiesta per vedere la risposta.
+    </div>
+
+    <section class="goal" id="goal" aria-labelledby="goal-title">
+      <h2 id="goal-title">Obiettivo</h2>
+      <p class="hint">Invia richieste che ottengano tutti e tre gli esiti del router:</p>
+      <ul>
+        <li data-outcome="ok">
+          <span class="mark" aria-hidden="true">○</span>
+          <span>una rotta risponde (<code>2xx</code>)</span>
+          <span class="visually-hidden state">: da fare</span>
+        </li>
+        <li data-outcome="not-found">
+          <span class="mark" aria-hidden="true">○</span>
+          <span><code>404 Not Found</code>: nessuna rotta ha il percorso</span>
+          <span class="visually-hidden state">: da fare</span>
+        </li>
+        <li data-outcome="method-not-allowed">
+          <span class="mark" aria-hidden="true">○</span>
+          <span><code>405 Method Not Allowed</code>: il percorso esiste con un altro metodo</span>
+          <span class="visually-hidden state">: da fare</span>
+        </li>
+      </ul>
+      <p id="goal-status" aria-live="polite"></p>
+    </section>
+
+    <script>
+      const routes = [
+        { method: 'GET', path: '/saluto', status: '200 OK', body: '{"messaggio": "Ciao!"}' },
+        {
+          method: 'GET',
+          path: '/saluto/{nome}',
+          status: '200 OK',
+          body: (params) => `{"messaggio": "Ciao, ${params.nome}!"}`,
+        },
+        { method: 'POST', path: '/messaggi', status: '201 Created', body: '{"id": 42}' },
+        { method: 'DELETE', path: '/messaggi/{id}', status: '204 No Content', body: '' },
+      ];
+
+      /** The path parameters when `path` matches `pattern`, otherwise null. */
+      function matchPath(pattern, path) {
+        const expected = pattern.split('/').filter(Boolean);
+        const actual = path.split('?')[0].split('/').filter(Boolean);
+        if (expected.length !== actual.length) return null;
+        const params = {};
+        for (let i = 0; i < expected.length; i++) {
+          const name = /^\{(\w+)\}$/.exec(expected[i]);
+          if (name) params[name[1]] = decodeURIComponent(actual[i]);
+          else if (expected[i] !== actual[i]) return null;
+        }
+        return params;
+      }
+
+      const table = document.getElementById('routes');
+      const output = document.getElementById('response');
+
+      function cell(row, text, code) {
+        const td = row.insertCell();
+        if (code) {
+          const element = document.createElement('code');
+          element.textContent = text;
+          td.append(element);
+        } else {
+          td.textContent = text;
+          td.className = 'why';
+        }
+      }
+
+      /** Routes the request, shows how each route compared and returns the outcome. */
+      function route(method, path) {
+        table.replaceChildren();
+        let found = null;
+        let pathOnly = false;
+        for (const candidate of routes) {
+          const params = matchPath(candidate.path, path);
+          const row = table.insertRow();
+          cell(row, candidate.method, true);
+          cell(row, candidate.path, true);
+          let why;
+          if (found) why = 'non confrontata: la richiesta ha già una rotta';
+          else if (!params) why = 'il percorso non corrisponde';
+          else if (candidate.method !== method) {
+            why = 'il percorso corrisponde, il metodo no';
+            pathOnly = true;
+          } else {
+            why = 'corrisponde: questa rotta risponde';
+            found = { route: candidate, params };
+            row.className = 'match';
+          }
+          cell(row, why, false);
+        }
+
+        output.replaceChildren();
+        const line = document.createElement('div');
+        const status = document.createElement('span');
+        let explanation;
+        let body = '';
+        let outcome;
+        if (found) {
+          outcome = 'ok';
+          status.textContent = found.route.status;
+          status.className = 'status ok';
+          body =
+            typeof found.route.body === 'function'
+              ? found.route.body(found.params)
+              : found.route.body;
+          explanation = 'Una rotta corrisponde per metodo e percorso.';
+        } else if (pathOnly) {
+          outcome = 'method-not-allowed';
+          status.textContent = '405 Method Not Allowed';
+          status.className = 'status ko';
+          explanation = 'Il percorso esiste, ma non con questo metodo.';
+        } else {
+          outcome = 'not-found';
+          status.textContent = '404 Not Found';
+          status.className = 'status ko';
+          explanation = 'Nessuna rotta ha questo percorso.';
+        }
+        line.append(`HTTP/1.1 `, status);
+        const why = document.createElement('p');
+        why.textContent = explanation;
+        why.style.margin = '4px 0 0';
+        output.append(line, why);
+        if (body) {
+          const pre = document.createElement('code');
+          pre.textContent = body;
+          output.append(pre);
+        }
+        return { outcome, found };
+      }
+
+      // The goal: the student obtains each outcome of the router at least once.
+      const goals = [...document.querySelectorAll('[data-outcome]')];
+      const reached = new Set();
+      let completed = false;
+
+      function renderGoal() {
+        for (const item of goals) {
+          const done = reached.has(item.dataset.outcome);
+          item.classList.toggle('reached', done);
+          item.querySelector('.mark').textContent = done ? '✓' : '○';
+          item.querySelector('.state').textContent = done ? ': fatto' : ': da fare';
+        }
+        document.getElementById('goal').classList.toggle('done', completed);
+        document.getElementById('goal-status').textContent = completed
+          ? 'Hai ottenuto tutti e tre gli esiti: il simulatore è completato.'
+          : `Esiti ottenuti: ${String(reached.size)} di ${String(goals.length)}.`;
+      }
+
+      function send() {
+        const input = document.getElementById('path').value.trim() || '/';
+        const method = document.getElementById('method').value;
+        const path = input.startsWith('/') ? input : `/${input}`;
+        const { outcome, found } = route(method, path);
+        const request = `${method} ${path}`;
+        if (outcome === 'ok') {
+          window.learn2k?.interacted('rotta-trovata', `${request} -> ${found.route.path}`);
+          if (Object.keys(found.params).length > 0) {
+            window.learn2k?.interacted('parametro-di-percorso', found.route.path);
+          }
+        } else if (outcome === 'not-found') {
+          window.learn2k?.interacted('percorso-non-trovato', request);
+        } else {
+          window.learn2k?.interacted('metodo-non-consentito', request);
+        }
+        reached.add(outcome);
+        if (!completed && reached.size === goals.length) {
+          completed = true;
+          window.learn2k?.complete();
+        }
+        renderGoal();
+      }
+      document.getElementById('send').addEventListener('click', send);
+      document.getElementById('path').addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') send();
+      });
+      // An example to start from: it does not count towards the goal.
+      route('GET', '/saluto/Ada');
+      renderGoal();
+    </script>
+  </body>
+</html>

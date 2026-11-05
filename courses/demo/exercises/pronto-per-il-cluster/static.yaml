@@ -1,0 +1,25 @@
+# I controlli statici dell'esercizio (ADR 033): gli strumenti leggono i file del progetto senza
+# costruirli né avviarli. Valgono solo le opzioni scritte qui, non la configurazione del progetto.
+tools:
+  - tool: hadolint
+    files: [Dockerfile]
+  - tool: actionlint
+    files: [.github/workflows/ci.yml]
+  - tool: kubeconform
+    files: ['k8s/*.yaml']
+  - tool: conftest
+    files: [Dockerfile]
+    parser: dockerfile
+    namespace: dockerfile
+    rules:
+      D1: Il servizio gira con un utente senza privilegi, non come root.
+  - tool: conftest
+    files: ['k8s/*.yaml']
+    namespace: kubernetes
+    # Le regole vedono tutti i manifest insieme: un Service e il Deployment che seleziona.
+    combine: true
+    rules:
+      K1: Ogni container ha un'immagine con una versione, non latest.
+      K2: Ogni container dichiara richieste e limiti di CPU e memoria.
+      K3: Ogni container ha una readinessProbe HTTP.
+      K4: Ogni Service seleziona i pod di un Deployment.

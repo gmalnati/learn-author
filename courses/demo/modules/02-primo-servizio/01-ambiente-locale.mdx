@@ -1,0 +1,81 @@
+---
+id: ambiente-locale
+title: Prepara l'ambiente
+duration: 20
+objectives:
+  - Installare Docker e la CLI learn
+  - Controllare l'ambiente con learn doctor
+  - Scaricare, verificare e consegnare un esercizio
+tags: [ambiente, esercizi]
+level: beginner
+---
+
+Gli esercizi si svolgono sul tuo computer: scrivi il codice con il tuo editor e lo verifichi con
+un solo comando. La verifica gira in **Docker**, quindi funziona allo stesso modo su Linux, macOS
+e Windows, e non devi installare né Kotlin né Rust.
+
+## Docker
+
+Installa [Docker Desktop](https://docs.docker.com/desktop/) su macOS e Windows, oppure Docker
+Engine con il plugin Compose su Linux. Assegna a Docker almeno 4 GB di memoria.
+
+<Callout type="warning" title="Su Windows">
+  Usa **WSL2**: installa Ubuntu dal Microsoft Store, attiva l'integrazione con WSL2 nelle
+  impostazioni di Docker Desktop e lancia tutti i comandi di questa lezione nel terminale di
+  Ubuntu.
+</Callout>
+
+## La CLI learn
+
+Scarica il programma `learn` per il tuo sistema e mettilo in una cartella del `PATH`:
+
+<CodeTabs>
+
+```sh title="macOS (Apple Silicon)"
+curl -fsSL -o learn https://github.com/gmalnati/learn-cli/releases/latest/download/learn-aarch64-apple-darwin
+chmod +x learn && sudo mv learn /usr/local/bin/
+```
+
+```sh title="Linux e WSL2 (x86_64)"
+curl -fsSL -o learn https://github.com/gmalnati/learn-cli/releases/latest/download/learn-x86_64-unknown-linux-musl
+chmod +x learn && sudo mv learn /usr/local/bin/
+```
+
+</CodeTabs>
+
+Per i processori ARM su Linux usa `learn-aarch64-unknown-linux-musl`, per i Mac Intel
+`learn-x86_64-apple-darwin`. In seguito `learn update` installa da solo le nuove versioni.
+
+## Accedi e controlla l'ambiente
+
+```sh
+learn login
+```
+
+Il comando mostra un indirizzo e un codice: aprilo nel browser, accedi con il tuo account e
+conferma il codice. Basta farlo una volta per dispositivo. Poi controlla che sia tutto pronto:
+
+```sh
+learn doctor
+```
+
+Ogni riga segnata con `✗` indica cosa sistemare, per esempio avviare Docker.
+
+## Il ciclo di lavoro
+
+1. `learn courses` elenca i tuoi corsi e i loro esercizi.
+2. `learn get <corso> <esercizio> --language rust` scarica lo starter dell'esercizio e prepara
+   le immagini Docker. Ogni esercizio è disponibile in uno o più linguaggi.
+3. Scrivi il codice nella cartella `starter/` del linguaggio scelto.
+4. `learn check`, nella cartella dell'esercizio, compila il codice, esegue i test interni e le
+   verifiche HTTP, poi invia l'esito alla piattaforma.
+
+```sh
+learn get demo hello-http --language rust
+cd hello-http
+learn check
+```
+
+Puoi lanciare `learn check` tutte le volte che vuoi: ogni verifica è un tentativo e conta il
+migliore. Se sei offline la verifica funziona lo stesso e l'esito viene inviato appena torni in
+linea.

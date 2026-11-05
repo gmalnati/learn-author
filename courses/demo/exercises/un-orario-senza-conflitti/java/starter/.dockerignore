@@ -1,0 +1,3 @@
+# What Gradle writes stays out of the build: the image compiles the project from its sources.
+build/
+.gradle/

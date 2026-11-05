@@ -1,0 +1,5 @@
+id: primo-servizio
+title: Il primo servizio
+description: Scrivere ed eseguire in locale un piccolo servizio HTTP.
+objectives:
+  - Implementare un endpoint HTTP e verificarlo con i test

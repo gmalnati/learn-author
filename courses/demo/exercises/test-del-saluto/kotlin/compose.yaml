@@ -1,0 +1,26 @@
+# Local check of the exercise: `learn check`, or `SRC=solution docker compose up --build
+# --exit-code-from check check` to verify the reference solution.
+services:
+  app:
+    build:
+      context: ./${SRC:-starter}
+      dockerfile: ../Dockerfile
+      # Exercises build offline, with the dependencies of the toolchain image only (EXE-09).
+      network: none
+      args:
+        REGISTRY: ${LEARN_REGISTRY:-ghcr.io/gmalnati}
+        # The caches of the project are named after the Compose project (ADR 027).
+        CACHE_ID: ${COMPOSE_PROJECT_NAME}
+      # The faulty versions of the code, mounted by the Dockerfile (ADR 024).
+      additional_contexts:
+        mutants: ./mutants
+    expose:
+      - '8080'
+  check:
+    image: ${LEARN_REGISTRY:-ghcr.io/gmalnati}/learn-verify:2026.2
+    depends_on:
+      - app
+    environment:
+      TARGET: http://app:8080
+    volumes:
+      - ../verify:/verify:ro

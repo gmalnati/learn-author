@@ -1,0 +1,10 @@
+# What the build of the checks reads of ./${SRC} (ADR 033): it replaces the .dockerignore of the
+# project, which a student may write for an image of their own and which could leave out the files
+# of the static checks. Out: the history of Git and what builds write.
+**/.git/
+**/build/
+**/.gradle/
+**/.kotlin/
+**/target/
+**/node_modules/
+**/dist/

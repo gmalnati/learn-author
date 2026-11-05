@@ -1,0 +1,4 @@
+# Le versioni difettose della funzione (ADR 024): una cartella <linguaggio>/mutants/<id>/ per ognuna.
+fine-del-successo: Il codice 299 è considerato una redirezione, ma è ancora un successo.
+inizio-degli-errori: Il codice 400 è considerato una redirezione, ma è il primo errore del client.
+oltre-il-599: Accetta come errori del server anche i codici da 600 a 999, che non esistono.

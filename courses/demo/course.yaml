@@ -1,0 +1,15 @@
+# Corso demo: usa ogni componente didattico ed è la fixture dei test del compiler.
+schemaVersion: 1
+id: demo
+title: Corso demo di Learn2K
+description: >-
+  Un breve corso sul protocollo HTTP che mostra tutti i componenti disponibili
+  per gli autori: testo, codice, immagini, video, quiz ed esercizi.
+language: it
+level: beginner
+tags: [http, web]
+authors:
+  - name: Team Learn2K
+# Gli esercizi sono servizi web: le toolchain con Spring Boot e Axum (ADR 027); due esercizi
+# usano invece la base, nel loro README.
+profiles: { kotlin: web, rust: web, java: web }

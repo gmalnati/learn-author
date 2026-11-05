@@ -1,0 +1,3 @@
+# The image has its own node_modules, and learn-build writes dist/: neither goes into the build.
+node_modules
+dist

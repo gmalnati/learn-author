@@ -1,0 +1,6 @@
+id: introduzione
+title: Introduzione
+description: Come funziona il corso e cosa succede quando il browser chiede una pagina.
+objectives:
+  - Orientarsi nel corso
+  - Descrivere il ciclo richiesta-risposta di HTTP

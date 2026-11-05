@@ -1,0 +1,4 @@
+# Le versioni difettose del servizio (ADR 024): una cartella <linguaggio>/mutants/<id>/ per ognuna.
+nome-vuoto: 'Un nome vuoto o di soli spazi non diventa «mondo»: il saluto è «Ciao, !».'
+spazi: Non toglie gli spazi intorno al nome.
+lunghezza: Accetta anche un nome di 31 caratteri, ma il limite è 30.

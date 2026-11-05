@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: saluto
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: saluto
+  template:
+    metadata:
+      labels:
+        app: saluto
+    spec:
+      # Il pod gira senza privilegi e scrive solo in /tmp.
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      containers:
+        - name: saluto
+          image: ghcr.io/esempio/saluto:1.0.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 100m
+              memory: 192Mi
+            limits:
+              cpu: 500m
+              memory: 384Mi
+          # Il pod riceve richieste solo quando il servizio risponde.
+          readinessProbe:
+            httpGet:
+              path: /saluto
+              port: 8080

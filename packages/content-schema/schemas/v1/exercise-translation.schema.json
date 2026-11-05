@@ -1,0 +1,23 @@
+{
+  "$id": "urn:learnlab:content:v1:exercise-translation.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    }
+  },
+  "required": [
+    "title",
+    "summary"
+  ],
+  "additionalProperties": false,
+  "title": "Learn2K translated exercise (README.md frontmatter)"
+}

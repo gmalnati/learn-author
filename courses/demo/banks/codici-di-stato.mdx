@@ -1,0 +1,39 @@
+---
+title: Codici di stato HTTP
+---
+
+{/* Domande sui codici di stato: i quiz le estraggono a caso, diverse a ogni tentativo (AUT-11). */}
+
+<Question id="codice-della-creazione" type="fill" explanation="`201 Created` conferma che la risorsa è stata creata, e `Location` dice dove trovarla.">
+  Un `POST` che crea una risorsa risponde con il codice <Blank answer={201} label="codice di stato" />.
+</Question>
+
+<Question id="risorsa-inesistente" type="single" objectives={["test-http"]}>
+  Che codice riceve una richiesta per una risorsa che non esiste?
+
+  <Option correct>`404 Not Found`</Option>
+  <Option explanation="`400` indica una richiesta scritta male, non una risorsa che manca.">`400 Bad Request`</Option>
+  <Option explanation="`500` indica un errore del server.">`500 Internal Server Error`</Option>
+</Question>
+
+<Question id="errori-del-client" type="multiple">
+  Quali codici indicano un errore del client?
+
+  <Option correct>`400 Bad Request`</Option>
+  <Option correct>`404 Not Found`</Option>
+  <Option explanation="I codici `5xx` sono errori del server.">`503 Service Unavailable`</Option>
+</Question>
+
+<Question id="reindirizzamento-permanente" type="true-false" answer={false} explanation="`302 Found` è un reindirizzamento temporaneo; quello permanente è `301 Moved Permanently`.">
+  `302 Found` indica un reindirizzamento permanente.
+</Question>
+
+<Question id="stato-della-creazione" type="find-error" explanation="Una risorsa appena creata si annuncia con `201 Created`, non con `200 OK`.">
+  Questa è la risposta a un `POST` che ha creato un libro. Quale riga contiene l'errore?
+
+  ```http showLineNumbers error={1}
+  HTTP/1.1 200 OK
+  Location: /libri/42
+  Content-Type: application/json
+  ```
+</Question>

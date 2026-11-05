@@ -1,0 +1,54 @@
+# Lo stesso file verifica il programma in Kotlin e in Rust (ADR 027): learn check lo avvia una volta
+# per ogni caso, con input sullo standard input, e confronta lo standard output e il codice di
+# uscita con output ed exit (0 se manca).
+cases:
+  - name: la radice, con GET
+    input: "GET / HTTP/1.1\n"
+    output: |
+      metodo: GET
+      percorso: /
+      versione: HTTP/1.1
+  - name: un percorso con la query
+    input: "GET /saluto?nome=Ada HTTP/1.1\n"
+    output: |
+      metodo: GET
+      percorso: /saluto
+      query: nome=Ada
+      versione: HTTP/1.1
+  - name: una POST in HTTP/1.0
+    input: "POST /ordini HTTP/1.0\n"
+    output: |
+      metodo: POST
+      percorso: /ordini
+      versione: HTTP/1.0
+  - name: una query vuota non si stampa
+    input: "GET /saluto? HTTP/1.1\n"
+    output: |
+      metodo: GET
+      percorso: /saluto
+      versione: HTTP/1.1
+  # Il confronto predefinito ignora gli spazi a fine riga, compreso un \r: quello esatto no.
+  - name: la riga termina con \r\n, come in HTTP
+    input: "GET /saluto HTTP/1.1\r\n"
+    output: "metodo: GET\npercorso: /saluto\nversione: HTTP/1.1\n"
+    compare: exact
+  - name: un metodo in minuscolo non è valido
+    input: "get / HTTP/1.1\n"
+    output: ''
+    exit: 2
+  - name: una riga senza versione non è valida
+    input: "GET /saluto\n"
+    output: ''
+    exit: 2
+  - name: una destinazione che non comincia con / non è valida
+    input: "GET saluto HTTP/1.1\n"
+    output: ''
+    exit: 2
+  - name: due spazi di fila non sono validi
+    input: "GET  / HTTP/1.1\n"
+    output: ''
+    exit: 2
+  - name: una versione sconosciuta non è valida
+    input: "GET / HTTP/2.0\n"
+    output: ''
+    exit: 2

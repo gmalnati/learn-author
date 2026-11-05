@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Simulator SDK (ADR 018): completed when the student reaches the last stage. -->
+    <meta name="learn2k-simulator" content="sdk=1; completion=reported" />
+    <title>Il ciclo di vita di una richiesta HTTP</title>
+    <style>
+      /* The portal sends its theme as data-theme; opened on its own, the page follows the system. */
+      :root {
+        color-scheme: light dark;
+        --bg: #ffffff;
+        --fg: #1f2933;
+        --muted: #52606d;
+        --border: #d9e2ec;
+        --surface: #f5f7fa;
+        --accent: #1d4ed8;
+        --active: #dbeafe;
+        --ok: #047857;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) {
+          --bg: #111827;
+          --fg: #f3f4f6;
+          --muted: #9ca3af;
+          --border: #374151;
+          --surface: #1f2937;
+          --accent: #93c5fd;
+          --active: #1e3a8a;
+          --ok: #6ee7b7;
+        }
+      }
+      :root[data-theme='dark'] {
+        color-scheme: dark;
+        --bg: #111827;
+        --fg: #f3f4f6;
+        --muted: #9ca3af;
+        --border: #374151;
+        --surface: #1f2937;
+        --accent: #93c5fd;
+        --active: #1e3a8a;
+        --ok: #6ee7b7;
+      }
+      :root[data-theme='light'] {
+        color-scheme: light;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 16px;
+        background: var(--bg);
+        color: var(--fg);
+        font:
+          15px/1.5 system-ui,
+          sans-serif;
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 1.15rem;
+      }
+      h2 {
+        margin: 0 0 4px;
+        font-size: 1rem;
+      }
+      p {
+        margin: 0 0 12px;
+        color: var(--muted);
+      }
+      code,
+      pre {
+        font-family: ui-monospace, monospace;
+      }
+
+      /* Diagram: DNS above the network, the server holds router and handler. */
+      .diagram {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px 10px;
+        margin: 12px 0 16px;
+      }
+      .wire {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        align-self: center;
+        height: 2px;
+        background: var(--border);
+      }
+      .dns-wire {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        justify-self: center;
+        width: 2px;
+        background: var(--border);
+      }
+      .node,
+      .server {
+        position: relative;
+        z-index: 1;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+      .node {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 56px;
+        padding: 6px 4px;
+        text-align: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+      }
+      .node .note:empty {
+        display: none;
+      }
+      .node .note {
+        color: var(--muted);
+        font-size: 0.75rem;
+        font-weight: 400;
+      }
+      .node[data-node='dns'] {
+        grid-column: 2;
+        grid-row: 1;
+      }
+      .node[data-node='browser'] {
+        grid-column: 1;
+        grid-row: 2;
+      }
+      .node[data-node='rete'] {
+        grid-column: 2;
+        grid-row: 2;
+      }
+      .server {
+        grid-column: 3 / span 2;
+        grid-row: 2;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+        padding: 4px 6px 6px;
+        border-style: dashed;
+        background: var(--bg);
+      }
+      .server .label {
+        grid-column: 1 / -1;
+        color: var(--muted);
+        font-size: 0.75rem;
+        text-align: center;
+      }
+      .node.active,
+      .server.active {
+        border: 2px solid var(--accent);
+        background: var(--active);
+      }
+      .node.active .note {
+        color: var(--fg);
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .counter {
+        margin-right: auto;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      @media (max-width: 479px) {
+        .counter {
+          flex-basis: 100%;
+        }
+        pre {
+          font-size: 0.8rem;
+        }
+      }
+      button {
+        padding: 8px 14px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--fg);
+        font: inherit;
+        cursor: pointer;
+      }
+      button.primary {
+        border-color: var(--accent);
+        background: var(--accent);
+        color: var(--bg);
+        font-weight: 600;
+      }
+      button:focus-visible,
+      pre:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      button:disabled {
+        cursor: default;
+        opacity: 0.5;
+      }
+
+      .stage {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 4px;
+      }
+      .explanation p {
+        color: var(--fg);
+      }
+      .explanation .where {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .snippet {
+        margin: 0;
+      }
+      .snippet figcaption {
+        margin-bottom: 4px;
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+      pre {
+        margin: 0;
+        padding: 10px 12px;
+        overflow-x: auto;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        font-size: 0.85rem;
+        line-height: 1.45;
+      }
+      .done {
+        margin: 12px 0 0;
+        padding: 10px 12px;
+        border-left: 3px solid var(--ok);
+        background: var(--surface);
+        color: var(--fg);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Il ciclo di vita di una richiesta HTTP</h1>
+    <p>
+      Segui una richiesta a <code>https://api.esempio.it/saluto/Ada</code>, dal browser al server e
+      ritorno. Usa «Avanti» e «Indietro» per passare da una fase all'altra.
+    </p>
+
+    <div class="diagram" aria-hidden="true">
+      <div class="wire"></div>
+      <div class="dns-wire"></div>
+      <div class="node" data-node="dns">DNS<span class="note"></span></div>
+      <div class="node" data-node="browser">Browser<span class="note"></span></div>
+      <div class="node" data-node="rete">Rete<span class="note"></span></div>
+      <div class="server" data-node="server">
+        <span class="label">Server</span>
+        <div class="node" data-node="router">Router<span class="note"></span></div>
+        <div class="node" data-node="handler">Handler<span class="note"></span></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <span class="counter" id="counter"></span>
+      <button type="button" id="back">Indietro</button>
+      <button type="button" id="next" class="primary">Avanti</button>
+      <button type="button" id="restart">Ricomincia</button>
+    </div>
+
+    <div class="stage">
+      <div class="explanation" aria-live="polite" aria-atomic="true">
+        <h2 id="stage-title"></h2>
+        <p class="where" id="stage-where"></p>
+        <p id="stage-text"></p>
+      </div>
+      <figure class="snippet">
+        <figcaption id="snippet-caption"></figcaption>
+        <pre id="snippet" tabindex="0" aria-labelledby="snippet-caption"></pre>
+      </figure>
+    </div>
+
+    <p class="done" id="done" role="status" hidden></p>
+
+    <script>
+      const REQUEST = [
+        'GET /saluto/Ada HTTP/1.1',
+        'Host: api.esempio.it',
+        'Accept: application/json',
+        'User-Agent: Mozilla/5.0 (…)',
+      ].join('\n');
+      const RESPONSE = [
+        'HTTP/1.1 200 OK',
+        'Content-Type: application/json',
+        'Content-Length: 27',
+        '',
+        '{"messaggio": "Ciao, Ada!"}',
+      ].join('\n');
+
+      // Each stage: the nodes of the diagram involved, a note on them, the explanation and the text.
+      const stages = [
+        {
+          title: 'Il browser prepara la richiesta',
+          where: 'Dove: nel browser.',
+          active: ['browser'],
+          notes: { browser: 'prepara' },
+          text: "Dall'URL il browser ricava lo schema (https), il nome del server (api.esempio.it) e il percorso (/saluto/Ada). Con il metodo e le intestazioni scrive la richiesta.",
+          caption: 'La richiesta',
+          snippet: REQUEST,
+        },
+        {
+          title: 'Risoluzione del nome (DNS)',
+          where: 'Dove: tra il browser e il server DNS.',
+          active: ['browser', 'dns'],
+          notes: { browser: 'chiede', dns: 'risponde' },
+          text: "Per collegarsi il browser non usa il nome ma l'indirizzo IP del server. Lo chiede al DNS, che risponde con l'indirizzo e per quanti secondi tenerlo in memoria (TTL).",
+          caption: 'Domanda e risposta DNS',
+          snippet: [
+            'Domanda:  api.esempio.it, indirizzo IPv4?',
+            'Risposta: 203.0.113.10 (valido per 300 s)',
+          ].join('\n'),
+        },
+        {
+          title: 'Connessione TCP',
+          where: 'Dove: tra il browser e il server, attraverso la rete.',
+          active: ['browser', 'rete', 'server'],
+          notes: { browser: 'SYN', rete: '⇄' },
+          text: "Il browser apre una connessione TCP verso l'indirizzo del server, sulla porta 443 di HTTPS. Bastano tre messaggi: da qui in poi i byte arrivano in ordine e senza perdite.",
+          caption: 'Apertura della connessione (three-way handshake)',
+          snippet: [
+            'browser → 203.0.113.10:443  SYN',
+            'server  → browser           SYN-ACK',
+            'browser → 203.0.113.10:443  ACK',
+          ].join('\n'),
+        },
+        {
+          title: 'Connessione sicura (TLS)',
+          where: 'Dove: tra il browser e il server, sulla connessione TCP.',
+          active: ['browser', 'rete', 'server'],
+          notes: { browser: 'verifica', rete: '⇄' },
+          text: 'Sopra la connessione TCP browser e server concordano le chiavi di cifratura. Il server presenta un certificato per api.esempio.it, che il browser verifica: così sa di parlare con il server giusto.',
+          caption: 'Handshake TLS 1.3, in breve',
+          snippet: [
+            'ClientHello  TLS 1.3, per api.esempio.it',
+            'ServerHello  + certificato del server',
+            'Finished     da qui i dati sono cifrati',
+          ].join('\n'),
+        },
+        {
+          title: 'La richiesta viaggia',
+          where: 'Dove: in rete, dal browser al server.',
+          active: ['rete'],
+          notes: { rete: 'richiesta →' },
+          text: 'Il browser invia la richiesta sulla connessione cifrata: chi sta in mezzo vede solo byte senza significato. Il server la riceve sulla porta 443, la decifra e la legge.',
+          caption: 'La richiesta, come la legge il server',
+          snippet: REQUEST,
+        },
+        {
+          title: "Il router sceglie l'handler",
+          where: 'Dove: nel server, nel router.',
+          active: ['router'],
+          notes: { router: 'confronta' },
+          text: "Il router confronta metodo e percorso con le rotte del servizio, in ordine. La prima che corrisponde decide quale funzione (l'handler) risponde, e ricava i parametri del percorso.",
+          caption: 'Il confronto con le rotte',
+          snippet: [
+            'GET  /saluto         no: percorso diverso',
+            'GET  /saluto/{nome}  sì: nome = "Ada"',
+            'POST /messaggi       non confrontata',
+          ].join('\n'),
+        },
+        {
+          title: "L'handler produce la risposta",
+          where: "Dove: nel server, nell'handler.",
+          active: ['handler'],
+          notes: { handler: 'risponde' },
+          text: "L'handler riceve il parametro nome e prepara la risposta: il codice di stato (200 OK), le intestazioni, tra cui il tipo del contenuto, e il corpo in JSON.",
+          caption: 'La risposta: stato, intestazioni e corpo',
+          snippet: RESPONSE,
+        },
+        {
+          title: 'La risposta torna indietro',
+          where: 'Dove: in rete, dal server al browser.',
+          active: ['rete'],
+          notes: { rete: '← risposta' },
+          text: 'La risposta torna al browser sulla stessa connessione, cifrata come la richiesta. La connessione resta aperta: le richieste successive allo stesso server non ripetono DNS, TCP e TLS.',
+          caption: 'Che cosa viaggia',
+          snippet: [
+            'server:443 → browser  (cifrata con TLS)',
+            '',
+            'HTTP/1.1 200 OK',
+            'Content-Type: application/json',
+            '…',
+          ].join('\n'),
+        },
+        {
+          title: 'Il browser mostra la risposta',
+          where: 'Dove: nel browser.',
+          active: ['browser'],
+          notes: { browser: 'mostra' },
+          text: 'Il browser legge il codice di stato e il tipo del contenuto. Il corpo è JSON: lo script della pagina lo trasforma in un oggetto e mostra il messaggio a chi la sta usando.',
+          caption: 'Come il browser interpreta la risposta',
+          snippet: [
+            '200 OK            la richiesta è riuscita',
+            'application/json  il corpo è JSON',
+            '{ messaggio: "Ciao, Ada!" }',
+            '',
+            'Sulla pagina: Ciao, Ada!',
+          ].join('\n'),
+        },
+      ];
+
+      const nodes = [...document.querySelectorAll('[data-node]')];
+      const back = document.getElementById('back');
+      const next = document.getElementById('next');
+      const done = document.getElementById('done');
+      const reached = new Set([0]);
+      let current = 0;
+      let completed = false;
+
+      function render() {
+        const stage = stages[current];
+        for (const node of nodes) {
+          const name = node.dataset.node;
+          node.classList.toggle('active', stage.active.includes(name));
+          const note = node.querySelector(':scope > .note');
+          if (note) note.textContent = stage.notes[name] ?? '';
+        }
+        document.getElementById('counter').textContent =
+          `Fase ${String(current + 1)} di ${String(stages.length)}`;
+        document.getElementById('stage-title').textContent = stage.title;
+        document.getElementById('stage-where').textContent = stage.where;
+        document.getElementById('stage-text').textContent = stage.text;
+        document.getElementById('snippet-caption').textContent = stage.caption;
+        document.getElementById('snippet').textContent = stage.snippet;
+        back.disabled = current === 0;
+        next.disabled = current === stages.length - 1;
+        done.hidden = !completed;
+        done.textContent = completed
+          ? 'Hai seguito la richiesta fino alla fine: il simulatore è completato.'
+          : '';
+      }
+
+      function go(index) {
+        current = index;
+        if (!reached.has(current)) {
+          reached.add(current);
+          window.learn2k?.interacted(`fase-${String(current + 1)}`, stages[current].title);
+        }
+        if (!completed && current === stages.length - 1) {
+          completed = true;
+          window.learn2k?.complete();
+        }
+        render();
+      }
+
+      next.addEventListener('click', () => {
+        go(current + 1);
+        // The button is disabled on the last stage: keep the focus on a control.
+        if (next.disabled) document.getElementById('restart').focus();
+      });
+      back.addEventListener('click', () => {
+        go(current - 1);
+        if (back.disabled) next.focus();
+      });
+      document.getElementById('restart').addEventListener('click', () => {
+        window.learn2k?.interacted('ricomincia');
+        go(0);
+        next.focus();
+      });
+      render();
+    </script>
+  </body>
+</html>
